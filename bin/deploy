@@ -3,11 +3,15 @@
 lib = File.expand_path(File.dirname(__FILE__) + '/../lib')
 $LOAD_PATH.unshift(lib) if File.directory?(lib) && !$LOAD_PATH.include?(lib)
 
-
 require "deploy"
 
-args = ARGV.dup
-ARGV.clear
-command = args.shift.strip rescue 'help'
+tag = ARGV[0]
+# Demand correct invocation, one argument only for tag, clean git, changelog
+if tag.nil?
+  abort "USAGE:
+        #{File.basename($0)} [TAG]
+        TAG: tag to deploy or create on current commit
+        Incorrect number of arguments given."
+end
+Deploy::Command.deploy(tag)
 
-Deploy::Command.run(command, args)

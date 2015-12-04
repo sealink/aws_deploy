@@ -7,7 +7,7 @@ module Deploy
       @settings ||= YAML.load(File.read(settings_path))
     end
 
-    def self.run(command, args)
+    def self.deploy(tag)
       puts "Configured with settings #{settings}"
     end
 
