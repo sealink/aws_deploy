@@ -1,8 +1,10 @@
 # Deploy
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/deploy`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Deploy is a gem for deploying your application code.
+The target is an upstream provider that allows you to tag your release, and upload the app.
+Currently, covered deployment usage scenarios are:
+    AWS Elastic Beanstalk applications (via AWS EB CLI)
+    AWS S3 hosted web sites (via npm bundle)
 
 ## Installation
 
@@ -20,9 +22,20 @@ Or install it yourself as:
 
     $ gem install deploy
 
+## Configuration
+
+Configure `config/settings.yml` for your environment.
+The gem makes certain assumptions about your S3 folder hierarchy.
+Specifically, it expects to find a bucket containing folders that map to your deployable applications.
+The application that is to be deployed is then expected to exist in the same named EB environment.
+Otherwise, it is expected to be found in the same named top level S3 bucket.
+
 ## Usage
 
-TODO: Write usage instructions here
+After installing the gem, invoke `bin/deploy` in your deployable project directory.
+Follow the interactive prompts.
+As per Configuration section, the deployment code makes certain assumptions.
+Please consider if they apply to your use case.
 
 ## Development
 
