@@ -2,7 +2,7 @@ require "deploy/version"
 require 'yaml'
 
 module Deploy
-  class Command
+  class Deployment
     def self.settings
       @settings ||= YAML.load(File.read(settings_path))
     end

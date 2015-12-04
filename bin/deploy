@@ -13,5 +13,4 @@ if tag.nil?
         TAG: tag to deploy or create on current commit
         Incorrect number of arguments given."
 end
-Deploy::Command.deploy(tag)
-
+Deploy::Deployment.deploy(tag)
