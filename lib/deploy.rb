@@ -1,4 +1,4 @@
-require "deploy/version"
+require 'deploy/version'
 require 'yaml'
 
 module Deploy
