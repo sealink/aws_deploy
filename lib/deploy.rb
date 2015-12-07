@@ -1,5 +1,6 @@
 require 'deploy/version'
 require 'yaml'
+require 'highline'
 require 'rugged'
 require 'aws-sdk'
 require 'deploy/repository'
@@ -17,6 +18,13 @@ module Deploy
       if repo.index_modified?
         fail "You have staged changes! Please sort your life out mate, innit?"
       end
+
+      cli = HighLine.new
+      changelog_updated =
+        cli.agree "Now hold on there for just a second, partner. "\
+                  "Have you updated the changelog ? "
+
+      fail 'Better hop to it then ay?' unless changelog_updated
 
       # Set up AWS params, i.e. region.
       ::Aws.config.update(region: settings['aws_region'])
