@@ -1,5 +1,7 @@
 require 'deploy/version'
 require 'yaml'
+require 'rugged'
+require 'deploy/repository'
 
 module Deploy
   class Deployment
@@ -9,6 +11,11 @@ module Deploy
 
     def self.deploy(tag)
       puts "Configured with settings #{settings}"
+
+      repo = Repository.new
+      if repo.index_modified?
+        fail "You have staged changes! Please sort your life out mate, innit?"
+      end
     end
 
     private
