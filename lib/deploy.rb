@@ -1,6 +1,7 @@
 require 'deploy/version'
 require 'yaml'
 require 'rugged'
+require 'aws-sdk'
 require 'deploy/repository'
 
 module Deploy
@@ -16,6 +17,10 @@ module Deploy
       if repo.index_modified?
         fail "You have staged changes! Please sort your life out mate, innit?"
       end
+
+      # Set up AWS params, i.e. region.
+      ::Aws.config.update(region: settings['aws_region'])
+
     end
 
     private
