@@ -1,9 +1,20 @@
 require "deploy/version"
+require 'yaml'
 
 module Deploy
-  # Your code goes here...
   class Command
+    def self.settings
+      @settings ||= YAML.load(File.read(settings_path))
+    end
+
     def self.run(command, args)
+      puts "Configured with settings #{settings}"
+    end
+
+    private
+
+    def self.settings_path
+      File.expand_path(File.dirname(__FILE__) + '/../config/settings.yml')
     end
   end
 end
