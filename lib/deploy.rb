@@ -20,14 +20,8 @@ module Deploy
     def run
       log "Configured with settings #{settings}"
       check_for_unstaged_changes!
+      check_for_changelog!
       set_aws_region!
-
-      changelog_updated =
-        cli.agree "Now hold on there for just a second, partner. "\
-                  "Have you updated the changelog ? "
-
-      fail 'Better hop to it then ay?' unless changelog_updated
-
 
       # Pull in and verify our deployment configurations
       log "Checking available configurations... Please wait..."
@@ -89,6 +83,13 @@ module Deploy
 
     def cli
       @cli ||= HighLine.new
+    end
+
+    def check_for_changelog!
+      changelog_updated =
+          cli.agree "Now hold on there for just a second, partner."\
+                    "Have you updated the changelog ?"
+      fail 'Better hop to it then ay?' unless changelog_updated
     end
 
     def set_aws_region!
