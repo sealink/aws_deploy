@@ -20,12 +20,10 @@ module Deploy
     def run
       puts "Configured with settings #{settings}"
 
-      repo = Repository.new
       if repo.index_modified?
         fail "You have staged changes! Please sort your life out mate, innit?"
       end
 
-      cli = HighLine.new
       changelog_updated =
         cli.agree "Now hold on there for just a second, partner. "\
                   "Have you updated the changelog ? "
@@ -36,7 +34,6 @@ module Deploy
       ::Aws.config.update(region: settings['aws_region'])
 
       # Pull in and verify our deployment configurations
-      configuration = Configuration.new(settings['config_bucket_name'])
       puts "Checking available configurations... Please wait..."
       configuration.verify!
       unless configuration.created_folders.empty?
@@ -46,7 +43,6 @@ module Deploy
       end
       puts "Check done."
       # Have the user decide what to deploy
-      apps = configuration.apps
       list = apps.map{|app| app.key.sub('/','')}
       puts "Configured applications are:"
       name = cli.choose do |menu|
@@ -85,6 +81,23 @@ module Deploy
     end
 
     private
+
+    def repo
+      @repo ||= Repository.new
+    end
+
+    def cli
+      @cli ||= HighLine.new
+    end
+
+    def configuration
+      @configuration ||= Configuration.new(settings['config_bucket_name'])
+    end
+
+    def apps
+      configuration.apps
+    end
+
     def settings
       @settings ||= YAML.load(File.read(settings_path))
     end
