@@ -19,6 +19,7 @@ module Deploy
 
     def run
       log "Configured with settings #{settings}"
+      set_aws_region!
 
       if repo.index_modified?
         fail "You have staged changes! Please sort your life out mate, innit?"
@@ -30,8 +31,6 @@ module Deploy
 
       fail 'Better hop to it then ay?' unless changelog_updated
 
-      # Set up AWS params, i.e. region.
-      ::Aws.config.update(region: settings['aws_region'])
 
       # Pull in and verify our deployment configurations
       log "Checking available configurations... Please wait..."
@@ -88,6 +87,11 @@ module Deploy
 
     def cli
       @cli ||= HighLine.new
+    end
+
+    def set_aws_region!
+      # Set up AWS params, i.e. region.
+      ::Aws.config.update(region: settings['aws_region'])
     end
 
     def configuration
