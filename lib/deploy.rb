@@ -25,15 +25,17 @@ module Deploy
       verify_configuration!
 
       @name, @app_bucket = select_app
-      platform   = detect_platform
+      @platform   = detect_platform
 
       confirm
       synchronize_repo!
+      deploy!
+    end
 
+    def deploy!
       log 'Deployment commencing.'
-      platform.deploy!
+      @platform.deploy!
       log "All done."
-
     end
 
     private
