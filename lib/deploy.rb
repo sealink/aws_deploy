@@ -5,6 +5,7 @@ require 'rugged'
 require 'aws-sdk'
 require 'deploy/repository'
 require 'deploy/configuration'
+require 'deploy/eb/state'
 
 module Deploy
   class Deployment
@@ -51,6 +52,10 @@ module Deploy
       app_bucket = apps.detect { |app| app.key == name + '/' }
       puts "Selected \"#{name}\"."
 
+      eb = Eb::State.new(app_bucket)
+      if eb.exists?
+        puts "Environment \'#{name}\' found on EB."
+      end
 
       confirm_launch = cli.agree "Deploy release \'#{tag}\' to \'#{name}\' ?"
       fail 'Bailing out.' unless confirm_launch
