@@ -30,6 +30,28 @@ Specifically, it expects to find a bucket containing folders that map to your de
 The application that is to be deployed is then expected to exist in the same named EB environment.
 Otherwise, it is expected to be found in the same named top level S3 bucket.
 
+Example: your S3 bucket named `configs-all` contains your application configurations.
+The applications themselves are either in ElasticBeanstalk or in S3 buckets.
+
+Then, if you have a static hosted S3 site in the bucket `my-site`, and an
+ EB application named `my-app` with environments `my-app` and `my-app-test`,
+you'd expect to have a configuration collection in S3 like this:
+
+`configs-all/my-app/config/1.0/somesetting.yml`
+
+`configs-all/my-app/config/2.0/somesetting.yml`
+
+`configs-all/my-app-test/config/1.0/somesetting.yml`
+
+`configs-all/my-app-test/config/2.0/somesetting.yml`
+
+`configs-all/my-site/config/1.0/somesetting.yml`
+
+`configs-all/my-site/config/2.0/somesetting.yml`
+
+And, the deployment process will ask you to choose to deploy `my-site`, or `my-app-test` or `my-app`.
+If you chose `my-site`, it will then attempt to find an ElasticBeanstalk environment or an S3 bucket with the name `my-site`.
+
 ## Usage
 
 After installing the gem, invoke `bin/deploy` in your deployable project directory.
