@@ -6,6 +6,7 @@ require 'aws-sdk'
 require 'deploy/repository'
 require 'deploy/configuration'
 require 'deploy/eb/state'
+require 'deploy/s3/state'
 
 module Deploy
   class Deployment
@@ -53,8 +54,14 @@ module Deploy
       puts "Selected \"#{name}\"."
 
       eb = Eb::State.new(app_bucket)
+      s3 = S3::State.new(app_bucket)
+
       if eb.exists?
         puts "Environment \'#{name}\' found on EB."
+      elsif s3.exists?
+        puts "Website \'#{name}\' found on S3."
+        puts "Config bucket version \"#{s3.version}\" selected."
+      end
       end
 
       confirm_launch = cli.agree "Deploy release \'#{tag}\' to \'#{name}\' ?"
