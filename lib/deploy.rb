@@ -28,9 +28,8 @@ module Deploy
       platform   = detect_platform
 
       confirm
+      synchronize_repo!
 
-      log 'Preparing the tagged release version for deployment.'
-      repo.prepare!(tag)
       log 'Deployment commencing.'
       platform.deploy!
       log "All done."
@@ -46,6 +45,11 @@ module Deploy
     def check_for_unstaged_changes!
       return unless repo.index_modified?
       fail "You have staged changes! Please sort your life out mate, innit?"
+    end
+
+    def synchronize_repo!
+      log 'Preparing the tagged release version for deployment.'
+      repo.prepare!(@tag)
     end
 
     def cli
