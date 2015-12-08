@@ -24,10 +24,7 @@ module Deploy
       set_aws_region!
       verify_configuration!
 
-      name, app_bucket = select_app
-
-      eb = Eb::State.new(app_bucket)
-      s3 = S3::State.new(app_bucket)
+      name, @app_bucket = select_app
 
       if eb.exists?
         platform = Eb::Platform.new(eb: eb, tag: @tag)
@@ -111,6 +108,14 @@ module Deploy
 
     def apps
       configuration.apps
+    end
+
+    def eb
+      @eb ||= Eb::State.new(@app_bucket)
+    end
+
+    def s3
+      @s3 ||= S3::State.new(@app_bucket)
     end
 
     def settings
