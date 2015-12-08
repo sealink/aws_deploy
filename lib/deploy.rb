@@ -24,15 +24,7 @@ module Deploy
       set_aws_region!
       verify_configuration!
 
-      # Have the user decide what to deploy
-      list = apps.map{|app| app.key.sub('/','')}
-      log "Configured applications are:"
-      name = cli.choose do |menu|
-        menu.prompt = "Choose application to deploy, by index or name."
-        menu.choices *list
-      end
-      app_bucket = apps.detect { |app| app.key == name + '/' }
-      log "Selected \"#{name}\"."
+      name, app_bucket = select_app
 
       eb = Eb::State.new(app_bucket)
       s3 = S3::State.new(app_bucket)
@@ -94,6 +86,18 @@ module Deploy
         end
       end
       log "Check done."
+    end
+
+    def select_app
+      # Have the user decide what to deploy
+      list = apps.map { |app| app.key.sub('/', '') }
+      log "Configured applications are:"
+      name = cli.choose do |menu|
+        menu.prompt = "Choose application to deploy, by index or name."
+        menu.choices *list
+      end
+      log "Selected \"#{name}\"."
+      name, apps.detect { |app| app.key == name + '/' }
     end
 
     def set_aws_region!
