@@ -18,7 +18,7 @@ module Deploy
     end
 
     def run
-      puts "Configured with settings #{settings}"
+      log "Configured with settings #{settings}"
 
       if repo.index_modified?
         fail "You have staged changes! Please sort your life out mate, innit?"
@@ -34,34 +34,34 @@ module Deploy
       ::Aws.config.update(region: settings['aws_region'])
 
       # Pull in and verify our deployment configurations
-      puts "Checking available configurations... Please wait..."
+      log "Checking available configurations... Please wait..."
       configuration.verify!
       unless configuration.created_folders.empty?
         configuration.created_folders.each do |folder|
-          puts "\tCreated #{folder}"
+          log "\tCreated #{folder}"
         end
       end
-      puts "Check done."
+      log "Check done."
       # Have the user decide what to deploy
       list = apps.map{|app| app.key.sub('/','')}
-      puts "Configured applications are:"
+      log "Configured applications are:"
       name = cli.choose do |menu|
         menu.prompt = "Choose application to deploy, by index or name."
         menu.choices *list
       end
       app_bucket = apps.detect { |app| app.key == name + '/' }
-      puts "Selected \"#{name}\"."
+      log "Selected \"#{name}\"."
 
       eb = Eb::State.new(app_bucket)
       s3 = S3::State.new(app_bucket)
 
       if eb.exists?
         platform = Eb::Platform.new(eb: eb, tag: @tag)
-        puts "Environment \'#{name}\' found on EB."
+        log "Environment \'#{name}\' found on EB."
       elsif s3.exists?
         platform = S3::Platform.new(s3: s3, tag: @tag)
-        puts "Website \'#{name}\' found on S3."
-        puts "Config bucket version \"#{s3.version}\" selected."
+        log "Website \'#{name}\' found on S3."
+        log "Config bucket version \"#{s3.version}\" selected."
       end
       unless platform
         fail "Application given as \'#{name}\'. "\
@@ -72,11 +72,11 @@ module Deploy
 
       confirm_launch = cli.agree "Deploy release \'#{@tag}\' to \'#{name}\' ?"
       fail 'Bailing out.' unless confirm_launch
-      puts 'Preparing the tagged release version for deployment.'
+      log 'Preparing the tagged release version for deployment.'
       repo.prepare!(tag)
-      puts 'Deployment commencing.'
+      log 'Deployment commencing.'
       platform.deploy!
-      puts "All done."
+      log "All done."
 
     end
 
@@ -104,6 +104,11 @@ module Deploy
 
     def settings_path
       File.expand_path(File.dirname(__FILE__) + '/../config/settings.yml')
+    end
+
+    def log(msg)
+      # Currently no logging mechanism besides message to stdout
+      puts msg
     end
   end
 end
