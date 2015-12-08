@@ -7,6 +7,8 @@ require 'deploy/repository'
 require 'deploy/configuration'
 require 'deploy/eb/state'
 require 'deploy/s3/state'
+require 'deploy/eb/platform'
+require 'deploy/s3/platform'
 
 module Deploy
   class Deployment
@@ -57,11 +59,18 @@ module Deploy
       s3 = S3::State.new(app_bucket)
 
       if eb.exists?
+        platform = Eb::Platform.new(eb: eb, tag: tag)
         puts "Environment \'#{name}\' found on EB."
       elsif s3.exists?
+        platform = S3::Platform.new(s3: s3, tag: tag)
         puts "Website \'#{name}\' found on S3."
         puts "Config bucket version \"#{s3.version}\" selected."
       end
+      unless platform
+        fail "Application given as \'#{name}\'. "\
+             "EB environment \'#{name}\' was not found. "\
+             "S3 bucket \'#{name}\' was not found either. "\
+             "Please fix this before attempting to deploy."
       end
 
       confirm_launch = cli.agree "Deploy release \'#{tag}\' to \'#{name}\' ?"
@@ -69,6 +78,8 @@ module Deploy
       puts 'Preparing the tagged release version for deployment.'
       repo.prepare!(tag)
       puts 'Deployment commencing.'
+      platform.deploy!
+      puts "All done."
 
     end
 
