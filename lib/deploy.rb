@@ -19,11 +19,8 @@ module Deploy
 
     def run
       log "Configured with settings #{settings}"
+      check_for_unstaged_changes!
       set_aws_region!
-
-      if repo.index_modified?
-        fail "You have staged changes! Please sort your life out mate, innit?"
-      end
 
       changelog_updated =
         cli.agree "Now hold on there for just a second, partner. "\
@@ -83,6 +80,11 @@ module Deploy
 
     def repo
       @repo ||= Repository.new
+    end
+
+    def check_for_unstaged_changes!
+      return unless repo.index_modified?
+      fail "You have staged changes! Please sort your life out mate, innit?"
     end
 
     def cli
