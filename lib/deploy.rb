@@ -22,16 +22,8 @@ module Deploy
       check_for_unstaged_changes!
       check_for_changelog!
       set_aws_region!
+      verify_configuration!
 
-      # Pull in and verify our deployment configurations
-      log "Checking available configurations... Please wait..."
-      configuration.verify!
-      unless configuration.created_folders.empty?
-        configuration.created_folders.each do |folder|
-          log "\tCreated #{folder}"
-        end
-      end
-      log "Check done."
       # Have the user decide what to deploy
       list = apps.map{|app| app.key.sub('/','')}
       log "Configured applications are:"
@@ -90,6 +82,18 @@ module Deploy
           cli.agree "Now hold on there for just a second, partner."\
                     "Have you updated the changelog ?"
       fail 'Better hop to it then ay?' unless changelog_updated
+    end
+
+    def verify_configuration!
+      # Pull in and verify our deployment configurations
+      log "Checking available configurations... Please wait..."
+      configuration.verify!
+      unless configuration.created_folders.empty?
+        configuration.created_folders.each do |folder|
+          log "\tCreated #{folder}"
+        end
+      end
+      log "Check done."
     end
 
     def set_aws_region!
