@@ -52,6 +52,12 @@ module Deploy
       puts "Selected \"#{name}\"."
 
 
+      confirm_launch = cli.agree "Deploy release \'#{tag}\' to \'#{name}\' ?"
+      fail 'Bailing out.' unless confirm_launch
+      puts 'Preparing the tagged release version for deployment.'
+      repo.prepare!(tag)
+      puts 'Deployment commencing.'
+
     end
 
     private
