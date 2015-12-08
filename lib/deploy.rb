@@ -11,12 +11,16 @@ require 'deploy/eb/platform'
 require 'deploy/s3/platform'
 
 module Deploy
-  class Deployment
+  class Runner
+
+    def initialize(tag)
+      @tag = tag
+    end
     def self.settings
       @settings ||= YAML.load(File.read(settings_path))
     end
 
-    def self.deploy(tag)
+    def run
       puts "Configured with settings #{settings}"
 
       repo = Repository.new
@@ -59,10 +63,10 @@ module Deploy
       s3 = S3::State.new(app_bucket)
 
       if eb.exists?
-        platform = Eb::Platform.new(eb: eb, tag: tag)
+        platform = Eb::Platform.new(eb: eb, tag: @tag)
         puts "Environment \'#{name}\' found on EB."
       elsif s3.exists?
-        platform = S3::Platform.new(s3: s3, tag: tag)
+        platform = S3::Platform.new(s3: s3, tag: @tag)
         puts "Website \'#{name}\' found on S3."
         puts "Config bucket version \"#{s3.version}\" selected."
       end
@@ -73,7 +77,7 @@ module Deploy
              "Please fix this before attempting to deploy."
       end
 
-      confirm_launch = cli.agree "Deploy release \'#{tag}\' to \'#{name}\' ?"
+      confirm_launch = cli.agree "Deploy release \'#{@tag}\' to \'#{name}\' ?"
       fail 'Bailing out.' unless confirm_launch
       puts 'Preparing the tagged release version for deployment.'
       repo.prepare!(tag)
