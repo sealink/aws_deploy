@@ -27,7 +27,7 @@ module Deploy
       @name, @app_bucket = select_app
       @platform   = detect_platform
 
-      confirm
+      request_confirmation!
       synchronize_repo!
       deploy!
     end
@@ -128,7 +128,7 @@ module Deploy
       platform
     end
 
-    def confirm
+    def request_confirmation!
       confirm_launch = cli.agree "Deploy release \'#{@tag}\' to \'#{@name}\' ?"
       fail 'Bailing out.' unless confirm_launch
     end
