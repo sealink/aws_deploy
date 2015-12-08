@@ -27,9 +27,8 @@ module Deploy
       @name, @app_bucket = select_app
       platform   = detect_platform
 
+      confirm
 
-      confirm_launch = cli.agree "Deploy release \'#{@tag}\' to \'#{name}\' ?"
-      fail 'Bailing out.' unless confirm_launch
       log 'Preparing the tagged release version for deployment.'
       repo.prepare!(tag)
       log 'Deployment commencing.'
@@ -121,6 +120,11 @@ module Deploy
                "Please fix this before attempting to deploy."
       end
       platform
+    end
+
+    def confirm
+      confirm_launch = cli.agree "Deploy release \'#{@tag}\' to \'#{@name}\' ?"
+      fail 'Bailing out.' unless confirm_launch
     end
 
     def settings
