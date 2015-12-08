@@ -42,16 +42,15 @@ module Deploy
       puts "Check done."
       # Have the user decide what to deploy
       apps = configuration.apps
-      app_names = apps.map(&:key)
-      puts "Found applications. Select index of the one to deploy:"
-      longest_key = app_names.max_by(&:length)
-      app_names.each_with_index do |app, index|
-        printf "%-#{longest_key.length}s %s\n", app.sub('/',''), index
+      list = apps.map{|app| app.key.sub('/','')}
+      puts "Configured applications are:"
+      name = cli.choose do |menu|
+        menu.prompt = "Choose application to deploy, by index or name."
+        menu.choices *list
       end
-      app_index = Integer(STDIN.gets)
-      app_bucket = apps.detect { |app| app.key == app_names[app_index] }
-      name = app_bucket.key.sub('/','')
-      puts "App configuration \"#{name}\" selected."
+      app_bucket = apps.detect { |app| app.key == name + '/' }
+      puts "Selected \"#{name}\"."
+
 
     end
 
