@@ -34,7 +34,8 @@ module Deploy
 
     def deploy!
       log 'Deployment commencing.'
-      fail "Deployment Failed, see system output." unless @platform.deploy!
+      success = @platform.deploy!
+      fail "Deployment Failed, see system output." unless success
       log 'All done.'
     end
 
