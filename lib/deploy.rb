@@ -60,7 +60,7 @@ module Deploy
 
     def check_for_changelog!
       changelog_updated =
-          cli.agree "Now hold on there for just a second, partner."\
+          cli.agree "Now hold on there for just a second, partner. "\
                     "Have you updated the changelog ?"
       fail 'Better hop to it then ay?' unless changelog_updated
     end
