@@ -18,7 +18,7 @@ module Deploy
     end
 
     def run
-      log "Configured with settings #{settings}"
+      log self
       check_for_unstaged_changes!
       check_for_changelog!
       set_aws_region!
@@ -145,6 +145,10 @@ module Deploy
     def log(msg)
       # Currently no logging mechanism besides message to stdout
       puts msg
+    end
+
+    def to_s
+      "Configured with setting #{settings}"
     end
   end
 end
