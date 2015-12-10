@@ -25,7 +25,7 @@ module Deploy
       verify_configuration!
 
       @name, @app_bucket = select_app
-      @platform   = detect_platform
+      @platform          = detect_platform
 
       request_confirmation!
       synchronize_repo!
