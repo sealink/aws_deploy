@@ -20,4 +20,14 @@ class DeployTest < Minitest::Test
     exception = assert_raises(ArgumentError) { Deploy::Runner.new(TAG, TAG) }
     assert_match /wrong number of arguments \([\d]+ for 1\)/, exception.message
   end
+
+  def test_that_it_requires_clean_index
+    repo = Minitest::Mock.new
+    repo.expect :index_modified?, true
+    runner = Deploy::Runner.new(TAG)
+    runner.stub(:repo, repo) do
+      exception = assert_raises(RuntimeError) { runner.run }
+      assert_equal "You have staged changes! Please sort your life out mate, innit?",
+                   exception.message
+    end
 end
