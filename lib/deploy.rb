@@ -86,7 +86,8 @@ module Deploy
         menu.choices *list
       end
       log "Selected \"#{name}\"."
-      name, apps.detect { |app| app.key == name + '/' }
+      app_bucket = apps.detect { |app| app.key == name + '/' }
+      return name, app_bucket
     end
 
     def set_aws_region!
