@@ -9,7 +9,7 @@ class DeployTest < Minitest::Test
 
   def test_that_it_requires_arguments
     exception = assert_raises(ArgumentError) { Deploy::Runner.new }
-    assert_equal("wrong number of arguments (0 for 1)", exception.message)
+    assert_equal "wrong number of arguments (0 for 1)", exception.message
   end
 
   def test_that_it_accepts_one_argument
