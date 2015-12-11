@@ -14,13 +14,18 @@ Add this line to your application's Gemfile:
 gem 'deploy'
 ```
 
+You may prefer to scope it to a single environment:
+
+```ruby
+group :development do
+  gem 'deploy', github: 'sealink/deploy'
+end
+```
+
 And then execute:
 
-    $ bundle
+    $ bundle exec deploy
 
-Or install it yourself as:
-
-    $ gem install deploy
 
 ## Configuration
 
