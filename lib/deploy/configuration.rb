@@ -48,7 +48,9 @@ class Configuration
     path_names = folder_names.map { |folder| folder + '/' }
 
     # Make the folder if needed
-    folders_to_create = path_names.sort_by { |name| name.count('/') }
+    folders_to_create = path_names.
+                        sort_by { |name| name.count('/') }.
+                        select{|folder| ! folder_exists?(folder) }
     folders_to_create.each do |folder|
       create_folder!(folder)
     end
@@ -63,7 +65,13 @@ class Configuration
         body: nil,
         bucket: config_bucket.name,
         key: folder
-      ) unless config_bucket.object(folder).exists?
+      )
+    end
+  end
+
+  def folder_exists?(folder)
+    call_with_error_handling do
+      config_bucket.object(folder).exists?
     end
   end
 
