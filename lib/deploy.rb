@@ -140,7 +140,7 @@ module Deploy
     end
 
     def settings_path
-      File.expand_path(File.dirname(__FILE__) + '/../config/settings.yml')
+      'config/deploy.yml'
     end
 
     def log(msg)

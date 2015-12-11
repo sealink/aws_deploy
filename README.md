@@ -29,7 +29,7 @@ And then execute:
 
 ## Configuration
 
-Configure `config/settings.yml` for your environment.
+Configure `config/deploy.yml` for your environment.
 The gem makes certain assumptions about your S3 folder hierarchy.
 Specifically, it expects to find a bucket containing folders that map to your deployable applications.
 The application that is to be deployed is then expected to exist in the same named EB environment.
