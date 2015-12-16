@@ -13,6 +13,10 @@ require 'deploy/s3/platform'
 module Deploy
   class Runner
 
+    Signal.trap("INT") {
+      abort "\nGot Ctrl-C, exiting.\nYou will have to abort any in-progress deployments manually."
+    }
+
     def initialize(tag)
       @tag = tag
     end
@@ -35,7 +39,7 @@ module Deploy
     def deploy!
       log 'Deployment commencing.'
       success = @platform.deploy!
-      fail "Deployment Failed, see system output." unless success
+      abort "Deployment Failed, see system output." unless success
       log 'All done.'
     end
 
@@ -47,7 +51,7 @@ module Deploy
 
     def check_for_unstaged_changes!
       return unless repo.index_modified?
-      fail "You have staged changes! Please sort your life out mate, innit?"
+      abort "You have staged changes! Please sort your life out mate, innit?"
     end
 
     def synchronize_repo!
@@ -63,7 +67,7 @@ module Deploy
       changelog_updated =
           cli.agree "Now hold on there for just a second, partner. "\
                     "Have you updated the changelog ?"
-      fail 'Better hop to it then ay?' unless changelog_updated
+      abort 'Better hop to it then ay?' unless changelog_updated
     end
 
     def verify_configuration!
@@ -122,7 +126,7 @@ module Deploy
         log "Config bucket version \"#{s3.version}\" selected."
       end
       unless platform
-        fail "Application given as \'#{@name}\'. "\
+        abort  "Application given as \'#{@name}\'. "\
                "EB environment \'#{@name}\' was not found. "\
                "S3 bucket \'#{@name}\' was not found either. "\
                "Please fix this before attempting to deploy."
@@ -132,7 +136,7 @@ module Deploy
 
     def request_confirmation!
       confirm_launch = cli.agree "Deploy release \'#{@tag}\' to \'#{@name}\' ?"
-      fail 'Bailing out.' unless confirm_launch
+      abort 'Bailing out.' unless confirm_launch
     end
 
     def settings
