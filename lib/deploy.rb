@@ -13,6 +13,10 @@ require 'deploy/s3/platform'
 module Deploy
   class Runner
 
+    Signal.trap("INT") {
+      abort "\nGot Ctrl-C, exiting.\nYou will have to abort any in-progress deployments manually."
+    }
+
     def initialize(tag)
       @tag = tag
     end
