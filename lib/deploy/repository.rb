@@ -1,3 +1,6 @@
+require 'fileutils'
+require 'open3'
+
 class Repository
   def index_modified?
     ! system('git diff-index --cached --quiet HEAD --ignore-submodules --')
@@ -12,7 +15,6 @@ class Repository
   private
 
   def tag_exists?
-    require 'open3'
     Open3.popen3("git rev-parse #{@tag}") { |i, o, e, t| e.read.chomp }.empty?
   end
 
@@ -24,7 +26,6 @@ class Repository
   end
 
   def version!
-    require 'fileutils'
     FileUtils.mkdir_p 'public'
     File.open('public/version.txt', 'w') { |file| file.puts(@tag) }
   end
