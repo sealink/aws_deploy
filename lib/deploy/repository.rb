@@ -31,14 +31,14 @@ class Repository
 
   def commit!
     puts "Committing version.txt..."
-    unless system('git add public/version.txt') && system("git commit -m #{commit_message}")
+    unless system('git add public/version.txt') && system("git commit -m \"#{commit_message}\" ")
       fail "Failed to commit."
     end
   end
 
   def tag!
     puts "Tagging #{@tag} as new version..."
-    unless system("git tag -a #{@tag} -m #{tag_message}")
+    unless system("git tag -a #{@tag} -m \"#{tag_message}\" ")
       fail "Failed to tag"
     end
   end
