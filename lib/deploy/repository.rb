@@ -28,7 +28,6 @@ class Repository
   end
 
   def commit!
-    message = "#{last_commit_message} - deploy"
     index.add path: 'public/version.txt',
               oid: (Rugged::Blob.from_workdir repo, 'public/version.txt'),
               mode: 0100644
@@ -37,7 +36,7 @@ class Repository
     Rugged::Commit.create repo,
       author: author,
       committer: author,
-      message: message,
+      message: commit_message,
       parents: [head.target],
       tree: commit_tree,
       update_ref: 'HEAD'
@@ -79,8 +78,12 @@ class Repository
     @now ||= Time.now
   end
 
+  def commit_message
+    @commit_message ||= "#{last_commit_message} - deploy"
+  end
+
   def last_commit_message
-    @last_commit_message ||= head.target.message
+    @last_commit_message ||= system('git log --pretty=%B -1')
   end
 
   def author
