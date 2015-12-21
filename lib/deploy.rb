@@ -1,7 +1,6 @@
 require 'deploy/version'
 require 'yaml'
 require 'highline'
-require 'rugged'
 require 'aws-sdk'
 require 'deploy/repository'
 require 'deploy/configuration'
