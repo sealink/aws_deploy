@@ -1,8 +1,4 @@
 class Repository
-  def repo
-    @repo ||= Rugged::Repository.discover('.')
-  end
-
   def index_modified?
     ! system('git diff-index --cached --quiet HEAD --ignore-submodules --')
   end
@@ -57,18 +53,6 @@ class Repository
   def tag_message
     "Deployed #{@tag}"
   end
-  # Helper Git methods
-  def index
-    repo.index
-  end
-
-  def head
-    repo.head
-  end
-
-  def now
-    @now ||= Time.now
-  end
 
   def commit_message
     @commit_message ||= "#{last_commit_message} - deploy"
@@ -76,13 +60,5 @@ class Repository
 
   def last_commit_message
     @last_commit_message ||= system('git log --pretty=%B -1')
-  end
-
-  def author
-    @author ||= {
-      name:  repo.config.get('user.name'),
-      email: repo.config.get('user.email'),
-      time:  now
-    }
   end
 end
