@@ -4,12 +4,7 @@ class Repository
   end
 
   def index_modified?
-    changeset = {}
-    repo.status do |file,status|
-      changeset[status.join] ||= []
-      changeset[status.join]<<file
-    end
-    changeset.keys.include? 'index_modified'
+    ! system('git diff-index --cached --quiet HEAD --ignore-submodules --')
   end
 
   def prepare!(tag)
