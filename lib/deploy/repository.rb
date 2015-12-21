@@ -16,7 +16,8 @@ class Repository
   private
 
   def tag_exists?
-    repo.tags.map(&:name).include? @tag
+    require 'open3'
+    Open3.popen3("git rev-parse #{@tag}") { |i, o, e, t| e.read.chomp }.empty?
   end
 
   def sync!
@@ -48,12 +49,12 @@ class Repository
       update_ref: 'HEAD'
   end
 
-  def tag_collection
-    @tag_collection ||= Rugged::TagCollection.new(repo)
-  end
 
   def tag!
-    tag_collection.create(@tag, head.target.oid)
+    puts "Tagging #{@tag} as new version..."
+    unless system("git tag -a #{@tag} -m #{tag_message}")
+      fail "Failed to tag"
+    end
   end
 
   def push!
@@ -63,6 +64,9 @@ class Repository
     end
   end
 
+  def tag_message
+    "Deployed #{@tag}"
+  end
   # Helper Git methods
   def index
     repo.index
