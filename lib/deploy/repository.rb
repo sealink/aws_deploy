@@ -27,25 +27,17 @@ class Repository
     push!
   end
 
-  def commit!
-    index.add path: 'public/version.txt',
-              oid: (Rugged::Blob.from_workdir repo, 'public/version.txt'),
-              mode: 0100644
-    commit_tree = index.write_tree repo
-    index.write
-    Rugged::Commit.create repo,
-      author: author,
-      committer: author,
-      message: commit_message,
-      parents: [head.target],
-      tree: commit_tree,
-      update_ref: 'HEAD'
-  end
-
   def version!
     require 'fileutils'
     FileUtils.mkdir_p 'public'
     File.open('public/version.txt', 'w') { |file| file.puts(@tag) }
+  end
+
+  def commit!
+    puts "Committing version.txt..."
+    unless system('git add public/version.txt') && system("git commit -m #{commit_message}")
+      fail "Failed to commit."
+    end
   end
 
   def tag!
