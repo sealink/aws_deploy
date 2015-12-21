@@ -48,7 +48,7 @@ class Repository
   end
 
   def push!
-    # Have to invoke git binary here, as gem won't push.
+    puts "Pushing changes to origin..."
     unless system('git push origin HEAD') && system('git push origin --tags')
       fail "Failed to git push."
     end
