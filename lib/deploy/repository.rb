@@ -21,19 +21,13 @@ class Repository
   end
 
   def sync!
+    version!
     commit!
     tag!
     push!
   end
 
   def commit!
-    puts "Writing version.txt..."
-    require 'fileutils'
-    FileUtils.mkdir_p 'public'
-    File.open('public/version.txt', 'w') do |file|
-      file.write(@tag)
-    end
-    puts "Tagging #{@tag} as new version and committing."
     message = "#{last_commit_message} - deploy"
     index.add path: 'public/version.txt',
               oid: (Rugged::Blob.from_workdir repo, 'public/version.txt'),
@@ -49,6 +43,11 @@ class Repository
       update_ref: 'HEAD'
   end
 
+  def version!
+    require 'fileutils'
+    FileUtils.mkdir_p 'public'
+    File.open('public/version.txt', 'w') { |file| file.puts(@tag) }
+  end
 
   def tag!
     puts "Tagging #{@tag} as new version..."
