@@ -60,6 +60,6 @@ class Repository
   end
 
   def last_commit_message
-    @last_commit_message ||= system('git log --pretty=%B -1')
+    @last_commit_message ||= `'git log --pretty=%B -1'`
   end
 end
