@@ -32,14 +32,14 @@ module Deploy
       deploy!
     end
 
+    private
+
     def deploy!
       log 'Deployment commencing.'
       success = @platform.deploy!
       abort "Deployment Failed or timed out. See system output." unless success
       log 'All done.'
     end
-
-    private
 
     def repo
       @repo ||= Repository.new
