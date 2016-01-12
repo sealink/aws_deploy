@@ -35,7 +35,7 @@ module Deploy
     def deploy!
       log 'Deployment commencing.'
       success = @platform.deploy!
-      abort "Deployment Failed, see system output." unless success
+      abort "Deployment Failed or timed out. See system output." unless success
       log 'All done.'
     end
 
