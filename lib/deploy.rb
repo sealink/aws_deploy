@@ -154,7 +154,8 @@ module Deploy
 
     def trap_int
       Signal.trap('INT') {
-        abort "\nGot Ctrl-C, exiting.\nYou will have to abort any in-progress deployments manually."
+        abort "\nGot Ctrl-C, exiting.\n\
+        You will have to abort any in-progress deployments manually."
       }
     end
 
