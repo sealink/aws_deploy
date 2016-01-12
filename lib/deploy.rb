@@ -12,16 +12,13 @@ require 'deploy/s3/platform'
 module Deploy
   class Runner
 
-    Signal.trap("INT") {
-      abort "\nGot Ctrl-C, exiting.\nYou will have to abort any in-progress deployments manually."
-    }
-
     def initialize(tag)
       @tag = tag
     end
 
     def run
       log self
+      trap_int
       check_for_unstaged_changes!
       check_for_changelog!
       set_aws_region!
@@ -149,6 +146,12 @@ module Deploy
     def log(msg)
       # Currently no logging mechanism besides message to stdout
       puts msg
+    end
+
+    def trap_int
+      Signal.trap('INT') {
+        abort "\nGot Ctrl-C, exiting.\nYou will have to abort any in-progress deployments manually."
+      }
     end
 
     def to_s
