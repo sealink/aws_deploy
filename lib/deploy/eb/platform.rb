@@ -1,5 +1,11 @@
+require 'open3'
+
 module Eb
   class Platform
+    def self.configured?
+      Open3.popen3("eb list") { |i, o, e, t| t.value }.exitstatus == 0
+    end
+
     def initialize(opts)
       @eb = opts[:eb]
       @tag = opts[:tag]
