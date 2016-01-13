@@ -116,7 +116,7 @@ module Deploy
     end
 
     def eb
-      @eb ||= Eb::State.new(@app_bucket)
+      @eb ||= Eb::State.new(@name)
     end
 
     def s3

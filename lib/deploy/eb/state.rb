@@ -1,7 +1,7 @@
 module Eb
   class State
-    def initialize(app_configs)
-      @env = app_configs.key.sub('/','')
+    def initialize(env)
+      @env = env
     end
 
     def exists?
