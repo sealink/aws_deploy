@@ -78,7 +78,7 @@ module Deploy
       log "Check done."
     end
 
-    def select_app
+    def selected_app
       # Have the user decide what to deploy
       list = apps.map { |app| app.key.sub('/', '') }
       log "Configured applications are:"
@@ -87,8 +87,12 @@ module Deploy
         menu.choices *list
       end
       log "Selected \"#{name}\"."
-      app_bucket = apps.detect { |app| app.key == name + '/' }
-      return name, app_bucket
+      name
+    end
+
+    def select_app
+      app_bucket = apps.detect { |app| app.key == selected_app + '/' }
+      return selected_app, app_bucket
     end
 
     def set_aws_region!
