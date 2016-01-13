@@ -24,7 +24,7 @@ module Deploy
       set_aws_region!
       verify_configuration!
 
-      @name       = selected_app_name(apps_list)
+      @name       = deployment_target
       @platform   = detect_platform
 
       request_confirmation!
@@ -80,6 +80,10 @@ module Deploy
 
     def apps_list
       list = apps.map { |app| app.key.sub('/', '') }
+    end
+
+    def deployment_target
+      selected_app_name(apps_list)
     end
 
     def selected_app_name(list)
