@@ -79,7 +79,7 @@ module Deploy
     end
 
     def apps_list
-      list = apps.map { |app| app.key.sub('/', '') }
+      apps.map { |app| app.key.sub('/', '') }
     end
 
     def deployment_target
