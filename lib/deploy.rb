@@ -24,8 +24,9 @@ module Deploy
       set_aws_region!
       verify_configuration!
 
-      @name, @app_bucket = select_app
-      @platform          = detect_platform
+      @name       = selected_app_name
+      @app_bucket = selected_app_bucket
+      @platform   = detect_platform
 
       request_confirmation!
       synchronize_repo!
@@ -78,7 +79,7 @@ module Deploy
       log "Check done."
     end
 
-    def selected_app
+    def selected_app_name
       # Have the user decide what to deploy
       list = apps.map { |app| app.key.sub('/', '') }
       log "Configured applications are:"
@@ -90,9 +91,8 @@ module Deploy
       name
     end
 
-    def select_app
-      app_bucket = apps.detect { |app| app.key == selected_app + '/' }
-      return selected_app, app_bucket
+    def selected_app_bucket
+      apps.detect { |app| app.key == selected_app_name + '/' }
     end
 
     def set_aws_region!
