@@ -8,6 +8,7 @@ require 'deploy/eb/state'
 require 'deploy/s3/state'
 require 'deploy/eb/platform'
 require 'deploy/s3/platform'
+require 'deploy/eb/application'
 
 module Deploy
   class Runner
@@ -124,6 +125,10 @@ module Deploy
 
     def s3
       @s3 ||= S3::State.new(@name, app_bucket)
+    end
+
+    def beanstalk_application(app)
+      @beanstalk_application ||= Eb::Application.new(app)
     end
 
     def detect_platform
