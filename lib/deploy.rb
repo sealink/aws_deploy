@@ -103,7 +103,13 @@ module Deploy
     end
 
     def deployment_target
-      selected_app_name(apps_list)
+      choice = selected_app_name(apps_list)
+      return choice unless fetch_eb
+      selected_app_name(eb_env_list(choice))
+    end
+
+    def eb_env_list(app)
+      beanstalk_application(app).environments
     end
 
     def selected_app_name(list)
@@ -131,7 +137,10 @@ module Deploy
     end
 
     def configuration
-      @configuration ||= Configuration.new(settings['config_bucket_name'])
+      return @configuration if @configuration
+      prefix = fetch_eb ? 'elasticbeanstalk' : 'config'
+      @configuration =
+        Configuration.new(settings["#{prefix}_bucket_name"])
     end
 
     def apps
