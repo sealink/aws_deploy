@@ -45,20 +45,20 @@ module Deploy
     end
 
     def fetch_eb
-      @fetch_eb.nil? ? set_configuration_source : @fetch_eb
+      @fetch_eb ||= configuration_source
     end
 
-    def set_configuration_source
-      return @fetch_eb = false unless Eb::Platform.configured?
+    def configuration_source
+      return false unless Eb::Platform.configured?
       log 'Elastic Beanstalk configuration detected locally.'
       bucket = settings['elasticbeanstalk_bucket_name']
       if !bucket || bucket.empty?
         log 'Warning:'
         log 'Unable to directly load Elastic Beanstalk configuration.'
         log 'Reason: settings[\'elasticbeanstalk_bucket_name\'] is not set.'
-        return @fetch_eb = false
+        return false
       end
-      @fetch_eb = true
+      true
     end
 
     def repo
