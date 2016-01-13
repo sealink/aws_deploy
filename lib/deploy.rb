@@ -25,7 +25,6 @@ module Deploy
       verify_configuration!
 
       @name       = selected_app_name(apps_list)
-      @app_bucket = selected_app_bucket
       @platform   = detect_platform
 
       request_confirmation!
@@ -94,7 +93,7 @@ module Deploy
       name
     end
 
-    def selected_app_bucket
+    def app_bucket
       apps.detect { |app| app.key == selected_app_name + '/' }
     end
 
@@ -120,7 +119,7 @@ module Deploy
     end
 
     def s3
-      @s3 ||= S3::State.new(@app_bucket)
+      @s3 ||= S3::State.new(@name, app_bucket)
     end
 
     def detect_platform

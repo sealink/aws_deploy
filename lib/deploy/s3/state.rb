@@ -1,8 +1,8 @@
 module S3
   class State
-    def initialize(app_configs)
+    def initialize(name, app_configs)
+      @name = name
       @app_configs = app_configs
-      @name = app_configs.key.sub('/','')
     end
 
     def exists?
