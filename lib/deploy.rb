@@ -45,7 +45,8 @@ module Deploy
     end
 
     def fetch_eb
-      @fetch_eb ||= configuration_source
+      @fetch_eb = configuration_source if @fetch_eb.nil?
+      @fetch_eb
     end
 
     def configuration_source
