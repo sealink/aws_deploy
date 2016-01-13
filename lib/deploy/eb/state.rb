@@ -1,7 +1,6 @@
 module Eb
   class State
     def initialize(app_configs)
-      @app_configs = app_configs
       @env = app_configs.key.sub('/','')
     end
 
