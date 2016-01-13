@@ -24,6 +24,7 @@ module Deploy
       check_for_unstaged_changes!
       check_for_changelog!
       set_aws_region!
+      fetch_eb
       verify_configuration!
 
       @name       = deployment_target
@@ -41,6 +42,23 @@ module Deploy
       success = @platform.deploy!
       abort "Deployment Failed or timed out. See system output." unless success
       log 'All done.'
+    end
+
+    def fetch_eb
+      @fetch_eb.nil? ? set_configuration_source : @fetch_eb
+    end
+
+    def set_configuration_source
+      return @fetch_eb = false unless Eb::Platform.configured?
+      log 'Elastic Beanstalk configuration detected locally.'
+      bucket = settings['elasticbeanstalk_bucket_name']
+      if !bucket || bucket.empty?
+        log 'Warning:'
+        log 'Unable to directly load Elastic Beanstalk configuration.'
+        log 'Reason: settings[\'elasticbeanstalk_bucket_name\'] is not set.'
+        return @fetch_eb = false
+      end
+      @fetch_eb = true
     end
 
     def repo
