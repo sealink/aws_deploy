@@ -24,7 +24,7 @@ module Deploy
       set_aws_region!
       verify_configuration!
 
-      @name       = selected_app_name
+      @name       = selected_app_name(apps_list)
       @app_bucket = selected_app_bucket
       @platform   = detect_platform
 
@@ -79,9 +79,12 @@ module Deploy
       log "Check done."
     end
 
-    def selected_app_name
-      # Have the user decide what to deploy
+    def apps_list
       list = apps.map { |app| app.key.sub('/', '') }
+    end
+
+    def selected_app_name(list)
+      # Have the user decide what to deploy
       log "Configured applications are:"
       name = cli.choose do |menu|
         menu.prompt = "Choose application to deploy, by index or name."
