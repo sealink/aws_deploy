@@ -164,7 +164,7 @@ module Deploy
     end
 
     def to_s
-      "Configured with setting #{settings}"
+      "Configured with settings: #{settings}"
     end
   end
 end
