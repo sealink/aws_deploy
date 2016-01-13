@@ -15,7 +15,9 @@ class Repository
   private
 
   def tag_exists?
-    Open3.popen3("git rev-parse #{@tag}") { |i, o, e, t| e.read.chomp }.empty?
+    Open3.popen3("git rev-parse #{@tag}") { |_input, _output, error, _thread|
+      error.read.chomp
+    }.empty?
   end
 
   def sync!
