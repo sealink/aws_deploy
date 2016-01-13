@@ -104,16 +104,16 @@ module Deploy
     end
 
     def deployment_target
-      choice = selected_app_name(apps_list)
+      choice = select_app_name(apps_list)
       return choice unless fetch_eb
-      selected_app_name(eb_env_list(choice))
+      select_app_name(eb_env_list(choice))
     end
 
     def eb_env_list(app)
       beanstalk_application(app).environments
     end
 
-    def selected_app_name(list)
+    def select_app_name(list)
       # Have the user decide what to deploy
       log "Configured applications are:"
       name = cli.choose do |menu|
