@@ -125,7 +125,7 @@ module Deploy
     end
 
     def app_bucket
-      apps.detect { |app| app.key == selected_app_name + '/' }
+      apps.detect { |app| app.key == @name + '/' }
     end
 
     def set_aws_region!
