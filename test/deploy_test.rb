@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 
 class DeployTest < Minitest::Test
   TAG='3.14.15'
@@ -30,4 +30,5 @@ class DeployTest < Minitest::Test
       assert_equal "You have staged changes! Please sort your life out mate, innit?",
                    exception.message
     end
+  end
 end

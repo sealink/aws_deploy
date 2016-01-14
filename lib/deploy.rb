@@ -8,9 +8,12 @@ require 'deploy/eb/state'
 require 'deploy/s3/state'
 require 'deploy/eb/platform'
 require 'deploy/s3/platform'
+require 'deploy/eb/application'
+require 'deploy/error_handler'
 
 module Deploy
   class Runner
+    EB_INTERNALS=%w(docker/ resources/)
 
     def initialize(tag)
       @tag = tag
@@ -22,24 +25,43 @@ module Deploy
       check_for_unstaged_changes!
       check_for_changelog!
       set_aws_region!
+      fetch_eb
       verify_configuration!
 
-      @name, @app_bucket = select_app
-      @platform          = detect_platform
+      @name       = deployment_target
+      @platform   = detect_platform
 
       request_confirmation!
       synchronize_repo!
       deploy!
     end
 
+    private
+
     def deploy!
       log 'Deployment commencing.'
       success = @platform.deploy!
-      abort "Deployment Failed, see system output." unless success
+      abort "Deployment Failed or timed out. See system output." unless success
       log 'All done.'
     end
 
-    private
+    def fetch_eb
+      @fetch_eb = configuration_source if @fetch_eb.nil?
+      @fetch_eb
+    end
+
+    def configuration_source
+      return false unless Eb::Platform.configured?
+      log 'Elastic Beanstalk configuration detected locally.'
+      bucket = settings['elasticbeanstalk_bucket_name']
+      if !bucket || bucket.empty?
+        log 'Warning:'
+        log 'Unable to directly load Elastic Beanstalk configuration.'
+        log 'Reason: settings[\'elasticbeanstalk_bucket_name\'] is not set.'
+        return false
+      end
+      true
+    end
 
     def repo
       @repo ||= Repository.new
@@ -78,38 +100,65 @@ module Deploy
       log "Check done."
     end
 
-    def select_app
+    def apps_list
+      apps.map { |app| app.key.sub('/', '') }
+    end
+
+    def deployment_target
+      choice = select_app_name(apps_list)
+      return choice unless fetch_eb
+      select_app_name(eb_env_list(choice))
+    end
+
+    def eb_env_list(app)
+      beanstalk_application(app).environments
+    end
+
+    def select_app_name(list)
       # Have the user decide what to deploy
-      list = apps.map { |app| app.key.sub('/', '') }
       log "Configured applications are:"
       name = cli.choose do |menu|
         menu.prompt = "Choose application to deploy, by index or name."
         menu.choices *list
       end
       log "Selected \"#{name}\"."
-      app_bucket = apps.detect { |app| app.key == name + '/' }
-      return name, app_bucket
+      name
+    end
+
+    def app_bucket
+      apps.detect { |app| app.key == @name + '/' }
     end
 
     def set_aws_region!
       # Set up AWS params, i.e. region.
-      ::Aws.config.update(region: settings['aws_region'])
+      region = ENV['AWS_REGION'] || settings['aws_region']
+      if ENV['AWS_REGION'].empty?
+        log "Warning: ENV['AWS_REGION'] is not set, falling back to YML config."
+      end
+      ::Aws.config.update(region: region)
     end
 
     def configuration
-      @configuration ||= Configuration.new(settings['config_bucket_name'])
+      return @configuration if @configuration
+      prefix = fetch_eb ? 'elasticbeanstalk' : 'config'
+      @configuration =
+        Configuration.new(settings["#{prefix}_bucket_name"])
     end
 
     def apps
-      configuration.apps
+      configuration.apps.reject{|app| EB_INTERNALS.include? app.key }
     end
 
     def eb
-      @eb ||= Eb::State.new(@app_bucket)
+      @eb ||= Eb::State.new(@name)
     end
 
     def s3
-      @s3 ||= S3::State.new(@app_bucket)
+      @s3 ||= S3::State.new(@name, app_bucket)
+    end
+
+    def beanstalk_application(app)
+      @beanstalk_application ||= Eb::Application.new(app)
     end
 
     def detect_platform
@@ -150,12 +199,13 @@ module Deploy
 
     def trap_int
       Signal.trap('INT') {
-        abort "\nGot Ctrl-C, exiting.\nYou will have to abort any in-progress deployments manually."
+        abort "\nGot Ctrl-C, exiting.\n\
+        You will have to abort any in-progress deployments manually."
       }
     end
 
     def to_s
-      "Configured with setting #{settings}"
+      "Configured with settings: #{settings}"
     end
   end
 end
