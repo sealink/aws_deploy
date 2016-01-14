@@ -26,15 +26,15 @@ module Deploy
 
     def config_bucket
       @config_bucket ||=
-        call_with_error_handling { Aws::S3::Bucket.new(@config_bucket_name) }
+        ErrorHandler.with_error_handling { Aws::S3::Bucket.new(@config_bucket_name) }
     end
 
     def objects
-      @objects ||= call_with_error_handling { config_bucket.objects }
+      @objects ||= ErrorHandler.with_error_handling { config_bucket.objects }
     end
 
     def client
-      @client ||= call_with_error_handling { Aws::S3::Client.new }
+      @client ||= ErrorHandler.with_error_handling { Aws::S3::Client.new }
     end
 
     def enforce_valid_app_paths!
@@ -60,7 +60,7 @@ module Deploy
     end
 
     def create_folder!(folder)
-      call_with_error_handling do
+      ErrorHandler.with_error_handling do
         client.put_object(
           acl: 'private',
           body: nil,
@@ -71,29 +71,19 @@ module Deploy
     end
 
     def folder_exists?(folder)
-      call_with_error_handling do
+      ErrorHandler.with_error_handling do
         config_bucket.object(folder).exists?
       end
     end
 
     def apps_list
-      call_with_error_handling do
+      ErrorHandler.with_error_handling do
         objects.select do |o|
           !o.key.empty?        &&
             o.key.end_with?('/') &&
             o.key.count('/') == 1
         end
       end
-    end
-
-    def call_with_error_handling
-      yield
-    rescue Aws::Errors::MissingCredentialsError => e
-      # Missing or incorrect AWS keys
-      fail "Missing AWS credentials. Error thrown by AWS: #{e}"
-    rescue Aws::S3::Errors::ServiceError => e
-      # rescues all errors returned by Amazon Simple Storage Service
-      fail "Error thrown by AWS S3: #{e}"
     end
   end
 end

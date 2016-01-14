@@ -9,6 +9,7 @@ require 'deploy/s3/state'
 require 'deploy/eb/platform'
 require 'deploy/s3/platform'
 require 'deploy/eb/application'
+require 'deploy/error_handler'
 
 module Deploy
   class Runner
