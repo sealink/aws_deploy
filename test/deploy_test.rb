@@ -30,4 +30,5 @@ class DeployTest < Minitest::Test
       assert_equal "You have staged changes! Please sort your life out mate, innit?",
                    exception.message
     end
+  end
 end
