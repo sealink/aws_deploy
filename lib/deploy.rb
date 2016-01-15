@@ -132,7 +132,7 @@ module Deploy
     def set_aws_region!
       # Set up AWS params, i.e. region.
       region = ENV['AWS_REGION'] || settings['aws_region']
-      if ENV['AWS_REGION'].empty?
+      if ENV['AWS_REGION'].to_s.empty?
         log "Warning: ENV['AWS_REGION'] is not set, falling back to YML config."
       end
       ::Aws.config.update(region: region)
