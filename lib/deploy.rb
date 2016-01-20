@@ -20,11 +20,21 @@ module Deploy
     end
 
     def run
+      validate!
+      perform!
+    end
+
+    private
+
+    def validate!
       log self
       trap_int
       check_for_unstaged_changes!
       check_for_changelog!
       set_aws_region!
+    end
+
+    def perform!
       fetch_eb
       verify_configuration!
 
@@ -35,8 +45,6 @@ module Deploy
       synchronize_repo!
       deploy!
     end
-
-    private
 
     def deploy!
       log 'Deployment commencing.'
