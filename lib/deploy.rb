@@ -47,11 +47,47 @@ module Deploy
       deploy!
     end
 
-    def deploy!
-      log 'Deployment commencing.'
-      success = @platform.deploy!
-      abort "Deployment Failed or timed out. See system output." unless success
-      log 'All done.'
+    def log(msg)
+      # Currently no logging mechanism besides message to stdout
+      puts msg
+    end
+
+    def to_s
+      "Configured with settings: #{settings}"
+    end
+
+    def settings
+      @settings ||= YAML.load(File.read(settings_path))
+    end
+
+    def settings_path
+      'config/deploy.yml'
+    end
+
+    def trap_int
+      Signal.trap('INT') {
+        abort "\nGot Ctrl-C, exiting.\n\
+        You will have to abort any in-progress deployments manually."
+      }
+    end
+
+    def check_for_unstaged_changes!
+      return unless repo.index_modified?
+      abort "You have staged changes! Please sort your life out mate, innit?"
+    end
+
+    def check_for_changelog!
+      changelog_updated =
+          cli.agree "Now hold on there for just a second, partner. "\
+                    "Have you updated the changelog ?"
+      abort 'Better hop to it then ay?' unless changelog_updated
+    end
+
+    def check_for_aws_access!
+      # Verify up AWS params, i.e. that we have access key and region.
+      # Do so by connecting to S3
+      user =  IAM::Client.connection
+      log "You are connected as #{user}."
     end
 
     def fetch_eb
@@ -76,11 +112,6 @@ module Deploy
       @repo ||= Repository.new
     end
 
-    def check_for_unstaged_changes!
-      return unless repo.index_modified?
-      abort "You have staged changes! Please sort your life out mate, innit?"
-    end
-
     def synchronize_repo!
       log 'Preparing the tagged release version for deployment.'
       repo.prepare!(@tag)
@@ -88,13 +119,6 @@ module Deploy
 
     def cli
       @cli ||= HighLine.new
-    end
-
-    def check_for_changelog!
-      changelog_updated =
-          cli.agree "Now hold on there for just a second, partner. "\
-                    "Have you updated the changelog ?"
-      abort 'Better hop to it then ay?' unless changelog_updated
     end
 
     def verify_configuration!
@@ -136,13 +160,6 @@ module Deploy
 
     def app_bucket
       apps.detect { |app| app.key == @name + '/' }
-    end
-
-    def check_for_aws_access!
-      # Verify up AWS params, i.e. that we have access key and region.
-      # Do so by connecting to S3
-      user =  IAM::Client.connection
-      log "You are connected as #{user}."
     end
 
     def configuration
@@ -191,28 +208,11 @@ module Deploy
       abort 'Bailing out.' unless confirm_launch
     end
 
-    def settings
-      @settings ||= YAML.load(File.read(settings_path))
-    end
-
-    def settings_path
-      'config/deploy.yml'
-    end
-
-    def log(msg)
-      # Currently no logging mechanism besides message to stdout
-      puts msg
-    end
-
-    def trap_int
-      Signal.trap('INT') {
-        abort "\nGot Ctrl-C, exiting.\n\
-        You will have to abort any in-progress deployments manually."
-      }
-    end
-
-    def to_s
-      "Configured with settings: #{settings}"
+    def deploy!
+      log 'Deployment commencing.'
+      success = @platform.deploy!
+      abort "Deployment Failed or timed out. See system output." unless success
+      log 'All done.'
     end
   end
 end
