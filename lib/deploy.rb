@@ -85,7 +85,8 @@ module Deploy
 
     def check_for_aws_access!
       # Verify up AWS params, i.e. that we have access key and region.
-      # Do so by connecting to S3
+      # Do so by connecting to IAM directly
+      # Why IAM? If your user doesn't exist, nothing else will work.
       user =  IAM::Client.connection
       log "You are connected as #{user}."
     end
