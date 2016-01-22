@@ -3,7 +3,7 @@ require 'yaml'
 require 'highline'
 require 'aws-sdk'
 require 'deploy/repository'
-require 'deploy/configuration'
+require 'deploy/s3/configuration'
 require 'deploy/eb/state'
 require 'deploy/s3/state'
 require 'deploy/eb/platform'
@@ -126,7 +126,7 @@ module Deploy
       return @configuration if @configuration
       prefix = fetch_eb ? 'elasticbeanstalk' : 'config'
       @configuration =
-        Configuration.new(settings["#{prefix}_bucket_name"])
+        S3::Configuration.new(settings["#{prefix}_bucket_name"])
     end
 
     def verify_configuration!
