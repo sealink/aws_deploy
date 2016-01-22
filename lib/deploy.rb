@@ -121,6 +121,13 @@ module Deploy
       @cli ||= HighLine.new
     end
 
+    def configuration
+      return @configuration if @configuration
+      prefix = fetch_eb ? 'elasticbeanstalk' : 'config'
+      @configuration =
+        Configuration.new(settings["#{prefix}_bucket_name"])
+    end
+
     def verify_configuration!
       # Pull in and verify our deployment configurations
       log "Checking available configurations... Please wait..."
@@ -160,13 +167,6 @@ module Deploy
 
     def app_bucket
       apps.detect { |app| app.key == @name + '/' }
-    end
-
-    def configuration
-      return @configuration if @configuration
-      prefix = fetch_eb ? 'elasticbeanstalk' : 'config'
-      @configuration =
-        Configuration.new(settings["#{prefix}_bucket_name"])
     end
 
     def apps
