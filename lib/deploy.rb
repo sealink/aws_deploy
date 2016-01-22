@@ -7,6 +7,7 @@ require 'deploy/configuration'
 require 'deploy/eb/state'
 require 'deploy/s3/state'
 require 'deploy/eb/platform'
+require 'deploy/iam/client'
 require 'deploy/s3/platform'
 require 'deploy/eb/application'
 require 'deploy/error_handler'
@@ -31,7 +32,7 @@ module Deploy
       trap_int
       check_for_unstaged_changes!
       check_for_changelog!
-      set_aws_region!
+      check_for_aws_access!
     end
 
     def perform!
@@ -137,13 +138,11 @@ module Deploy
       apps.detect { |app| app.key == @name + '/' }
     end
 
-    def set_aws_region!
-      # Set up AWS params, i.e. region.
-      region = ENV['AWS_REGION'] || settings['aws_region']
-      if ENV['AWS_REGION'].to_s.empty?
-        log "Warning: ENV['AWS_REGION'] is not set, falling back to YML config."
-      end
-      ::Aws.config.update(region: region)
+    def check_for_aws_access!
+      # Verify up AWS params, i.e. that we have access key and region.
+      # Do so by connecting to S3
+      user =  IAM::Client.connection
+      log "You are connected as #{user}."
     end
 
     def configuration
