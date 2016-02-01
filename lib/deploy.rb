@@ -28,7 +28,6 @@ module Deploy
     private
 
     def validate!
-      log self
       trap_int
       check_for_unstaged_changes!
       check_for_changelog!
@@ -50,10 +49,6 @@ module Deploy
     def log(msg)
       # Currently no logging mechanism besides message to stdout
       puts msg
-    end
-
-    def to_s
-      "Configured with settings: #{settings}"
     end
 
     def settings
