@@ -21,6 +21,7 @@ module Deploy
     end
 
     def run
+      trap_int
       validate!
       perform!
     end
@@ -28,7 +29,6 @@ module Deploy
     private
 
     def validate!
-      trap_int
       check_for_unstaged_changes!
       check_for_changelog!
       check_for_aws_access!
