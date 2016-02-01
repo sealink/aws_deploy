@@ -23,6 +23,7 @@ module Deploy
     def run
       trap_int
       precheck!
+      validate!
       perform!
     end
 
@@ -34,13 +35,16 @@ module Deploy
       check_for_aws_access!
     end
 
-    def perform!
       fetch_eb
+    def validate!
+
       configure!
 
       @name       = deployment_target
       @platform   = detect_platform
+    end
 
+    def perform!
       request_confirmation!
       synchronize_repo!
       deploy!
