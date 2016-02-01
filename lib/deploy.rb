@@ -22,13 +22,13 @@ module Deploy
 
     def run
       trap_int
-      validate!
+      precheck!
       perform!
     end
 
     private
 
-    def validate!
+    def precheck!
       check_for_unstaged_changes!
       check_for_changelog!
       check_for_aws_access!
