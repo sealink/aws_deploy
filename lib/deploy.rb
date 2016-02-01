@@ -36,7 +36,7 @@ module Deploy
 
     def perform!
       fetch_eb
-      verify_configuration!
+      configure!
 
       @name       = deployment_target
       @platform   = detect_platform
@@ -124,7 +124,7 @@ module Deploy
         S3::Configuration.new(settings["#{prefix}_bucket_name"])
     end
 
-    def verify_configuration!
+    def configure!
       # Pull in and verify our deployment configurations
       log "Checking available configurations... Please wait..."
       configuration.verify!
