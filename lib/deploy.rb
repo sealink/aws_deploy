@@ -14,8 +14,6 @@ require 'deploy/error_handler'
 
 module Deploy
   class Runner
-    EB_INTERNALS=%w(docker/ resources/)
-
     def initialize(tag)
       @tag = tag
     end
@@ -186,7 +184,7 @@ module Deploy
     end
 
     def apps
-      configuration.apps.reject{|app| EB_INTERNALS.include? app.key }
+      configuration.apps
     end
 
     def eb
