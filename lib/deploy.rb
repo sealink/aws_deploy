@@ -94,7 +94,7 @@ module Deploy
     end
 
     def configuration_source
-      return false unless Eb::Platform.configured?
+      return false unless on_beanstalk?
       log 'Elastic Beanstalk configuration detected locally.'
       bucket = settings['elasticbeanstalk_bucket_name']
       if !bucket || bucket.empty?
@@ -104,6 +104,10 @@ module Deploy
         return false
       end
       true
+    end
+
+    def on_beanstalk?
+      @on_beanstalk ||= Eb::Platform.configured?
     end
 
     def repo
