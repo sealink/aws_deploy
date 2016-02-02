@@ -121,13 +121,11 @@ module Deploy
 
     def configuration
       return @configuration if @configuration
-      prefix = if fetch_eb
-        'elasticbeanstalk'
+      @configuration = if fetch_eb
+        S3::Configuration.new(settings['elasticbeanstalk_bucket_name'])
       else
-        'config'
+        S3::Configuration.new(settings['config_bucket_name'])
       end
-      @configuration =
-        S3::Configuration.new(settings["#{prefix}_bucket_name"])
     end
 
     def configure!
