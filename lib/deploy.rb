@@ -124,8 +124,20 @@ module Deploy
       @configuration = if fetch_eb
         S3::Configuration.new(settings['elasticbeanstalk_bucket_name'])
       else
-        S3::Configuration.new(settings['config_bucket_name'])
+        S3::Configuration.new(config_bucket_name)
+    end
+
+    def config_bucket_name
+      @config_bucket_name ||= set_config_bucket_name!
+    end
+
+    def set_config_bucket_name!
+      bucket_name = ENV['S3_CONFIG_BUCKET']
+      unless bucket_name
+        fail 'Please set your S3 config bucket name in '\
+             'ENV[\'S3_CONFIG_BUCKET\']'
       end
+      bucket_name
     end
 
     def configure!
