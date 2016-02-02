@@ -16,7 +16,7 @@ module Deploy
 
       def apps
         fail "Asked for app list without verifying. It will be wrong." if !@verified
-        @apps ||= apps_list
+        @apps ||= app_buckets_list
       end
 
       def created_folders
@@ -77,7 +77,7 @@ module Deploy
         end
       end
 
-      def apps_list
+      def app_buckets_list
         ErrorHandler.with_error_handling do
           objects.select do |o|
             !o.key.empty?        &&
