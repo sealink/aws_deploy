@@ -33,7 +33,6 @@ module Deploy
       check_for_aws_access!
     end
 
-      fetch_eb
     def validate!
       configure!
       @name       = deployment_target
@@ -84,24 +83,6 @@ module Deploy
       # Why IAM? If your user doesn't exist, nothing else will work.
       user =  IAM::Client.connection
       log "You are connected as #{user}."
-    end
-
-    def fetch_eb
-      @fetch_eb = configuration_source if @fetch_eb.nil?
-      @fetch_eb
-    end
-
-    def configuration_source
-      return false unless on_beanstalk?
-      log 'Elastic Beanstalk configuration detected locally.'
-      bucket = settings['elasticbeanstalk_bucket_name']
-      if !bucket || bucket.empty?
-        log 'Warning:'
-        log 'Unable to directly load Elastic Beanstalk configuration.'
-        log 'Reason: settings[\'elasticbeanstalk_bucket_name\'] is not set.'
-        return false
-      end
-      true
     end
 
     def on_beanstalk?
