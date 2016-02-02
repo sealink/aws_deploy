@@ -124,12 +124,8 @@ module Deploy
       log "Check done."
     end
 
-    def apps_list
-      apps.map { |app| app.key.sub('/', '') }
-    end
-
     def deployment_target
-      select_app_name(apps_list)
+      select_app_name(apps)
     end
 
     def eb_env_list(app)
@@ -148,7 +144,7 @@ module Deploy
     end
 
     def app_bucket
-      apps.detect { |app| app.key == @name + '/' }
+      configuration.config_bucket_for(@name)
     end
 
     def apps

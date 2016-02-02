@@ -16,11 +16,15 @@ module Deploy
 
       def apps
         fail "Asked for app list without verifying. It will be wrong." if !@verified
-        @apps ||= app_buckets_list
+        @apps ||= app_names
       end
 
       def created_folders
         @created_folders ||= []
+      end
+
+      def config_bucket_for(name)
+        app_buckets.detect { |app| app.key == name + '/' }
       end
 
       private
@@ -77,6 +81,10 @@ module Deploy
         end
       end
 
+      def app_buckets
+        @app_buckets ||= app_buckets_list
+      end
+
       def app_buckets_list
         ErrorHandler.with_error_handling do
           objects.select do |o|
@@ -85,6 +93,10 @@ module Deploy
               o.key.count('/') == 1
           end
         end
+      end
+
+      def app_names
+        app_buckets.map{|o| o.key.sub('/', '') }
       end
     end
   end
