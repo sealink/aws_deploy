@@ -50,14 +50,6 @@ module Deploy
       puts msg
     end
 
-    def settings
-      @settings ||= YAML.load(File.read(settings_path))
-    end
-
-    def settings_path
-      'config/deploy.yml'
-    end
-
     def trap_int
       Signal.trap('INT') {
         abort "\nGot Ctrl-C, exiting.\n\

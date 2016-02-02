@@ -1,2 +1,0 @@
-config_bucket_name: 'config'
-elasticbeanstalk_bucket_name: 'elasticbeanstalk-region-account'
