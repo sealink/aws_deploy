@@ -1,5 +1,4 @@
 require 'deploy/version'
-require 'yaml'
 require 'highline'
 require 'aws-sdk'
 require 'deploy/repository'
