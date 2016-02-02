@@ -37,9 +37,7 @@ module Deploy
 
       fetch_eb
     def validate!
-
       configure!
-
       @name       = deployment_target
       @platform   = detect_platform
     end
