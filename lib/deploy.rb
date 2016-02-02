@@ -160,8 +160,11 @@ module Deploy
 
     def deployment_target
       choice = select_app_name(apps_list)
-      return choice unless fetch_eb
-      select_app_name(eb_env_list(choice))
+      if fetch_eb
+        select_app_name(eb_env_list(choice))
+      else
+        choice
+      end
     end
 
     def eb_env_list(app)
