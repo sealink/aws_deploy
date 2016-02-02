@@ -122,10 +122,7 @@ module Deploy
     end
 
     def configuration
-      return @configuration if @configuration
-      @configuration = if fetch_eb
-        S3::Configuration.new(settings['elasticbeanstalk_bucket_name'])
-      else
+      @configuration ||=
         S3::Configuration.new(config_bucket_name)
     end
 
@@ -159,11 +156,7 @@ module Deploy
     end
 
     def deployment_target
-      if fetch_eb
-        select_app_name(eb_env_list(select_app_name(apps_list)))
-      else
-        select_app_name(apps_list)
-      end
+      select_app_name(apps_list)
     end
 
     def eb_env_list(app)
