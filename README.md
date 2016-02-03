@@ -16,7 +16,7 @@ gem install deploy_aws
 And then execute:
 
 ```shell
-deploy_aws
+deploy
 ```
 
 ## Configuration
@@ -44,7 +44,7 @@ Then, the deployment process will ask you to choose to deploy `my-site`, and the
 
 ## Usage
 
-After installing the gem, execute `deploy_aws` in your deployable project directory.
+After installing the gem, execute `deploy` in your deployable project directory.
 Follow the interactive prompts.
 As per Configuration section, the deployment code makes certain assumptions.
 Please consider if they apply to your use case.
