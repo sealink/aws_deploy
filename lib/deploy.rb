@@ -1,6 +1,7 @@
 require 'aws-sdk'
 require 'highline'
 require 'deploy/eb/application'
+require 'deploy/eb/configuration'
 require 'deploy/eb/platform'
 require 'deploy/eb/state'
 require 'deploy/iam/client'
@@ -94,8 +95,15 @@ module Deploy
     end
 
     def configuration
-      @configuration ||=
+      @configuration ||= set_configuration
+    end
+
+    def set_configuration
+      if on_beanstalk?
+        Eb::Configuration.new
+      else
         S3::Configuration.new(config_bucket_name)
+      end
     end
 
     def config_bucket_name
@@ -112,6 +120,7 @@ module Deploy
     end
 
     def configure!
+      return if on_beanstalk?
       # Pull in and verify our deployment configurations
       log "Checking available configurations... Please wait..."
       configuration.verify!
@@ -124,7 +133,9 @@ module Deploy
     end
 
     def deployment_target
-      select_from_list(apps)
+      app = select_from_list(apps)
+      return app unless on_beanstalk?
+      select_from_list(eb_env_list(app))
     end
 
     def eb_env_list(app)
