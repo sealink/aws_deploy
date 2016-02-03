@@ -175,6 +175,7 @@ module Deploy
 
     def verify_platform
       if eb.exists?
+        fail "EB app found but you did not \'eb init\'" unless on_beanstalk?
         platform = Eb::Platform.new(eb: eb, tag: @tag)
         log "Environment \'#{@name}\' found on EB."
       elsif s3.exists?
