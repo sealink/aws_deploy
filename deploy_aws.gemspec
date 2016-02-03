@@ -5,14 +5,14 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'deploy/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "deploy"
+  spec.name          = "deploy_aws"
   spec.version       = Deploy::VERSION
   spec.authors       = ["Michael Smirnoff"]
   spec.email         = ["michael.smirnoff@sealink.com.au"]
 
-  spec.summary       = %q{Deploys from current Git repo to various platforms}
+  spec.summary       = %q{Deploys from current Git repo to AWS}
   spec.description   = %q{Deploys from current Git repo to AWS EB or S3 (via node)}
-  spec.homepage      = "https://github.com/sealink/deploy"
+  spec.homepage      = "https://github.com/sealink/deploy_aws"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
