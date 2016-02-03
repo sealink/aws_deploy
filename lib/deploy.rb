@@ -1,75 +1,88 @@
-require 'deploy/version'
-require 'yaml'
-require 'highline'
 require 'aws-sdk'
-require 'deploy/repository'
-require 'deploy/configuration'
-require 'deploy/eb/state'
-require 'deploy/s3/state'
-require 'deploy/eb/platform'
-require 'deploy/s3/platform'
+require 'highline'
 require 'deploy/eb/application'
+require 'deploy/eb/configuration'
+require 'deploy/eb/platform'
+require 'deploy/eb/state'
+require 'deploy/iam/client'
+require 'deploy/s3/configuration'
+require 'deploy/s3/state'
+require 'deploy/s3/platform'
 require 'deploy/error_handler'
+require 'deploy/repository'
+require 'deploy/version'
 
 module Deploy
   class Runner
-    EB_INTERNALS=%w(docker/ resources/)
-
     def initialize(tag)
       @tag = tag
     end
 
     def run
-      log self
       trap_int
+      precheck!
+      validate!
+      perform!
+    end
+
+    private
+
+    def precheck!
       check_for_unstaged_changes!
       check_for_changelog!
-      set_aws_region!
-      fetch_eb
-      verify_configuration!
+      check_for_aws_access!
+    end
 
+    def validate!
+      configure!
       @name       = deployment_target
-      @platform   = detect_platform
+      @platform   = verify_platform
+    end
 
+    def perform!
       request_confirmation!
       synchronize_repo!
       deploy!
     end
 
-    private
-
-    def deploy!
-      log 'Deployment commencing.'
-      success = @platform.deploy!
-      abort "Deployment Failed or timed out. See system output." unless success
-      log 'All done.'
+    def log(msg)
+      # Currently no logging mechanism besides message to stdout
+      puts msg
     end
 
-    def fetch_eb
-      @fetch_eb = configuration_source if @fetch_eb.nil?
-      @fetch_eb
-    end
-
-    def configuration_source
-      return false unless Eb::Platform.configured?
-      log 'Elastic Beanstalk configuration detected locally.'
-      bucket = settings['elasticbeanstalk_bucket_name']
-      if !bucket || bucket.empty?
-        log 'Warning:'
-        log 'Unable to directly load Elastic Beanstalk configuration.'
-        log 'Reason: settings[\'elasticbeanstalk_bucket_name\'] is not set.'
-        return false
-      end
-      true
-    end
-
-    def repo
-      @repo ||= Repository.new
+    def trap_int
+      Signal.trap('INT') {
+        abort "\nGot Ctrl-C, exiting.\n\
+        You will have to abort any in-progress deployments manually."
+      }
     end
 
     def check_for_unstaged_changes!
       return unless repo.index_modified?
       abort "You have staged changes! Please sort your life out mate, innit?"
+    end
+
+    def check_for_changelog!
+      changelog_updated =
+          cli.agree "Now hold on there for just a second, partner. "\
+                    "Have you updated the changelog ?"
+      abort 'Better hop to it then ay?' unless changelog_updated
+    end
+
+    def check_for_aws_access!
+      # Verify up AWS params, i.e. that we have access key and region.
+      # Do so by connecting to IAM directly
+      # Why IAM? If your user doesn't exist, nothing else will work.
+      user =  IAM::Client.connection
+      log "You are connected as #{user}."
+    end
+
+    def on_beanstalk?
+      @on_beanstalk ||= Eb::Platform.configured?
+    end
+
+    def repo
+      @repo ||= Repository.new
     end
 
     def synchronize_repo!
@@ -81,14 +94,33 @@ module Deploy
       @cli ||= HighLine.new
     end
 
-    def check_for_changelog!
-      changelog_updated =
-          cli.agree "Now hold on there for just a second, partner. "\
-                    "Have you updated the changelog ?"
-      abort 'Better hop to it then ay?' unless changelog_updated
+    def configuration
+      @configuration ||= set_configuration
     end
 
-    def verify_configuration!
+    def set_configuration
+      if on_beanstalk?
+        Eb::Configuration.new
+      else
+        S3::Configuration.new(config_bucket_name)
+      end
+    end
+
+    def config_bucket_name
+      @config_bucket_name ||= set_config_bucket_name!
+    end
+
+    def set_config_bucket_name!
+      bucket_name = ENV['S3_CONFIG_BUCKET']
+      unless bucket_name
+        fail 'Please set your S3 config bucket name in '\
+             'ENV[\'S3_CONFIG_BUCKET\']'
+      end
+      bucket_name
+    end
+
+    def configure!
+      return if on_beanstalk?
       # Pull in and verify our deployment configurations
       log "Checking available configurations... Please wait..."
       configuration.verify!
@@ -100,21 +132,17 @@ module Deploy
       log "Check done."
     end
 
-    def apps_list
-      apps.map { |app| app.key.sub('/', '') }
-    end
-
     def deployment_target
-      choice = select_app_name(apps_list)
-      return choice unless fetch_eb
-      select_app_name(eb_env_list(choice))
+      app = select_from_list(apps)
+      return app unless on_beanstalk?
+      select_from_list(eb_env_list(app))
     end
 
     def eb_env_list(app)
       beanstalk_application(app).environments
     end
 
-    def select_app_name(list)
+    def select_from_list(list)
       # Have the user decide what to deploy
       log "Configured applications are:"
       name = cli.choose do |menu|
@@ -126,27 +154,11 @@ module Deploy
     end
 
     def app_bucket
-      apps.detect { |app| app.key == @name + '/' }
-    end
-
-    def set_aws_region!
-      # Set up AWS params, i.e. region.
-      region = ENV['AWS_REGION'] || settings['aws_region']
-      if ENV['AWS_REGION'].to_s.empty?
-        log "Warning: ENV['AWS_REGION'] is not set, falling back to YML config."
-      end
-      ::Aws.config.update(region: region)
-    end
-
-    def configuration
-      return @configuration if @configuration
-      prefix = fetch_eb ? 'elasticbeanstalk' : 'config'
-      @configuration =
-        Configuration.new(settings["#{prefix}_bucket_name"])
+      configuration.config_bucket_for(@name)
     end
 
     def apps
-      configuration.apps.reject{|app| EB_INTERNALS.include? app.key }
+      configuration.apps
     end
 
     def eb
@@ -161,8 +173,9 @@ module Deploy
       @beanstalk_application ||= Eb::Application.new(app)
     end
 
-    def detect_platform
+    def verify_platform
       if eb.exists?
+        fail "EB app found but you did not \'eb init\'" unless on_beanstalk?
         platform = Eb::Platform.new(eb: eb, tag: @tag)
         log "Environment \'#{@name}\' found on EB."
       elsif s3.exists?
@@ -184,28 +197,11 @@ module Deploy
       abort 'Bailing out.' unless confirm_launch
     end
 
-    def settings
-      @settings ||= YAML.load(File.read(settings_path))
-    end
-
-    def settings_path
-      'config/deploy.yml'
-    end
-
-    def log(msg)
-      # Currently no logging mechanism besides message to stdout
-      puts msg
-    end
-
-    def trap_int
-      Signal.trap('INT') {
-        abort "\nGot Ctrl-C, exiting.\n\
-        You will have to abort any in-progress deployments manually."
-      }
-    end
-
-    def to_s
-      "Configured with settings: #{settings}"
+    def deploy!
+      log 'Deployment commencing.'
+      success = @platform.deploy!
+      abort "Deployment Failed or timed out. See system output." unless success
+      log 'All done.'
     end
   end
 end
