@@ -19,10 +19,6 @@ module Deploy
         @apps ||= app_names
       end
 
-      def sub_apps(app)
-        []
-      end
-
       def created_folders
         @created_folders ||= []
       end
