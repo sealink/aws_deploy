@@ -36,7 +36,7 @@ module Deploy
     def validate!
       configure!
       @name       = deployment_target
-      @platform   = detect_platform
+      @platform   = verify_platform
     end
 
     def perform!
@@ -173,7 +173,7 @@ module Deploy
       @beanstalk_application ||= Eb::Application.new(app)
     end
 
-    def detect_platform
+    def verify_platform
       if eb.exists?
         platform = Eb::Platform.new(eb: eb, tag: @tag)
         log "Environment \'#{@name}\' found on EB."
